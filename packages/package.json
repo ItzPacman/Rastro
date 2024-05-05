@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.2",
+    "dotenv": "^16.4.5",
+    "react-router-dom": "^6.23.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.3"
+  }
+}
