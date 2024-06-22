@@ -1,54 +1,44 @@
 var Rastro = artifacts.require("./Rastro.sol");
-var USDD = artifacts.require("./USDD.sol");
-
-
-const TronWeb = require('tronweb');
-
-const tronWeb = new TronWeb({
-  fullHost: 'https://nile.trongrid.io',
-
-});
+// var USDD = artifacts.require("./USDD.sol");
+const tronWeb = require("tronweb");
 
 
 module.exports = async function (deployer, network) {
 
+  
+  console.log("network", network);
+  
 
-let USDD_ADDRESS;
 
-
-  if (network === 'shasta') {
+  if (network === "mainnet") {
     console.log("Deploying  contract...");
 
+    // try {
+    //   await deployer.deploy(USDD);
+    //   const USDDContract = await USDD.deployed();
+    //   const USDDContracAddress = USDDContract.address;
+    //   console.log(
+    //     "USDD Contract address",
+    //     tronWeb.address.fromHex(USDDContracAddress)
+    //   );
+      
+    // } catch (error) {
+    //   console.error("Error deploying USDD :", error.message);
+    // }
+
     try {
-      await deployer.deploy(USDD);
-      const USDDContract = await USDD.deployed();
-      const USDDContracAddress = USDDContract.address;
-      console.log('USDD Contract address', tronWeb.address.fromHex(USDDContracAddress))
-      USDD_ADDRESS=tronWeb.address.fromHex(USDDContracAddress)
-
-
-    } catch (error) {
-      console.error("Error deploying Rastro lib:", error);
-    } 
-
-    try {
-      await deployer.deploy(Rastro, USDD_ADDRESS);
+      await deployer.deploy(Rastro, "TR3FAxxGLFwRh8daUtjiosU8zSsohpBF73");
       const RastroContract = await Rastro.deployed();
       const RastroContractAddress = RastroContract.address;
-      console.log('Rastro Contract address', tronWeb.address.fromHex(RastroContractAddress))
-
+      console.log(
+        "Rastro Contract address",
+        tronWeb.address.fromHex(RastroContractAddress)
+      );
     } catch (error) {
       console.error("Error deploying Rastro lib:", error);
     }
-
-
- 
-   
-  }
-
-
-
+   }
 };
 
-// Rastro address TNqDxpdP3Ey7FHpy9iMQqzjA3R8wgHtG9P
-// USDD address TVx3uronhu3uoVZb3fD2rNgQLtddFQsx9q
+// Rastro address TFsHABHZMM6zY9G3GEGMAcrpCQiGMgoT54
+// USDD address TR3FAxxGLFwRh8daUtjiosU8zSsohpBF73
