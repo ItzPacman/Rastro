@@ -10,7 +10,7 @@ import withReactContent from "sweetalert2-react-content";
 import Transfer from "./Transfer.js";
 // import {ethers} from "ethers";
 
-const Navbar = () => {
+const Mainbar = () => {
   const MySwal = withReactContent(Swal);
 
   const showAlert = () => {
@@ -132,39 +132,41 @@ const Navbar = () => {
   return (
     <div className="bg-[#f3f4f7] min-w-screen font-main">
       <header className="w-full mt-5 text-gray-700 shadow-md body-font">
-        <div className="container flex flex-col items-start justify-between p-10 mx-auto md:flex-row">
-          <h6 className="font-bold ml-2 text-lg">Rastro</h6>
-          <img
-            alt="logo"
-            height={30}
-            width={30}
-            src={logo}
-            className="flex items-center"
-          />
-          <nav className=" md:ml-auto  md:mr-auto">
+        <div className=" flex items-center  justify-center p-10 ">
+          <div className="flex items-center w-[10%]">
+            <h6 className="font-bold ml-2 text-lg">Rastro</h6>
+            <img
+              alt="logo"
+              height={30}
+              width={30}
+              src={logo}
+              className="flex items-center"
+            />
+          </div>
+          <div className=" ml-96 w-[47%] ">
             <button
-              className="mr-4 ml-28 underline-offset-4 underline  font-medium hover:text-gray-900"
+              className="mr-5  hover:underline-offset-4 hover:underline  font-medium hover:text-gray-900"
               onClick={() => setActiveComponent("Deposit")}
             >
               Deposit
             </button>
 
             <button
-              className=" mr-4 font-medium hover:text-gray-900  "
+              className=" mr-5 hover:underline-offset-4 hover:underline  font-medium hover:text-gray-900  "
               onClick={() => setActiveComponent("Approve")}
             >
               Approve
             </button>
 
             <button
-              className="mr-4 font-medium hover:text-gray-900"
+              className="mr-5 hover:underline-offset-4 hover:underline  font-medium hover:text-gray-900"
               onClick={() => setActiveComponent("Distribute")}
             >
               Distribute
             </button>
 
             <button
-              className="font-medium mr-4 hover:text-gray-900"
+              className="font-medium mr-4 hover:underline-offset-4 hover:underline  hover:text-gray-900"
               onClick={() => setActiveComponent("Redeem")}
             >
               Redeem
@@ -176,12 +178,12 @@ const Navbar = () => {
             >
               Transfer
             </button>
-          </nav>
-          <div className="flex items-center space-x-4 justify-between">
+          </div>
+          <div className="flex items-center space-x-4 w-[10%] justify-center">
             <p className="font-medium hover:text-gray-900">
               {address
                 ? `${address.slice(0, 4)}...${address.slice(-6)}`
-                : "No address connected"}
+                : ""}
             </p>
             <button
               onClick={connectToTronLink}
@@ -190,7 +192,7 @@ const Navbar = () => {
               {sessionStorage.getItem("address") === "false" ||
               sessionStorage.getItem("address") === null ||
               sessionStorage.getItem("address") === ""
-                ? "connect wallet"
+                ? "connect "
                 : "Connected"}
             </button>
           </div>
@@ -202,4 +204,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default Mainbar;

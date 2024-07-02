@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import ApprovePopup from "./ApprovePopup";
+import ApprovePopup from "../PopUps/ApprovePopup";
 import { Link } from "react-router-dom";
 
 const Approve = ({RastroContractAddress}) => {
@@ -96,8 +96,8 @@ const Approve = ({RastroContractAddress}) => {
               </thead>
               {data.length > 0 ? (
                 data.map((item, index) => (
-                  <tbody key={index}>
-                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                  <tbody  key={index}>
+                    <tr className="bg-white border-b">
                       <th
                         scope="row"
                         className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"

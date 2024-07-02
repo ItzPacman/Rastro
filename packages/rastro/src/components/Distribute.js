@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import DistributePopup from "./DistributePopup";
+import DistributePopup from "../PopUps/DistributePopup";
 import { Link } from "react-router-dom";
 
 const Distribute = ({RastroContractAddress}) => {
