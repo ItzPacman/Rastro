@@ -141,30 +141,30 @@ const Navbar = () => {
             src={logo}
             className="flex items-center"
           />
-          <nav className=" md:ml-auto md:mr-auto">
+          <nav className=" md:ml-auto  md:mr-auto">
             <button
-              className="mr-5  ml-20 font-medium hover:text-gray-900"
+              className="mr-4 ml-28 underline-offset-4 underline  font-medium hover:text-gray-900"
               onClick={() => setActiveComponent("Deposit")}
             >
               Deposit
             </button>
 
             <button
-              className=" mr-5 font-medium hover:text-gray-900"
+              className=" mr-4 font-medium hover:text-gray-900  "
               onClick={() => setActiveComponent("Approve")}
             >
               Approve
             </button>
 
             <button
-              className="mr-5 font-medium hover:text-gray-900"
+              className="mr-4 font-medium hover:text-gray-900"
               onClick={() => setActiveComponent("Distribute")}
             >
               Distribute
             </button>
 
             <button
-              className="font-medium mr-5 hover:text-gray-900"
+              className="font-medium mr-4 hover:text-gray-900"
               onClick={() => setActiveComponent("Redeem")}
             >
               Redeem

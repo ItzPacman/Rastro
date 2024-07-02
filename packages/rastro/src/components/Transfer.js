@@ -1,12 +1,10 @@
 import React from "react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-const Transfer = ({RastroContractAddress}) => {
- 
-
+const Transfer = ({ RastroContractAddress }) => {
   const [transaction, setTransaction] = useState("");
   const [loading, setLoading] = useState("Transfer");
-  const [vendorWallet , setVendorWallet] = useState("");
+  const [vendorWallet, setVendorWallet] = useState("");
 
   const [amount, setamount] = useState();
 
@@ -17,33 +15,26 @@ const Transfer = ({RastroContractAddress}) => {
   const handleTransfer = async (event) => {
     event.preventDefault();
 
-    // try {
-    //   if (!tronWeb) {
-    //     throw new Error("TronWeb is not initialized.");
-    //   }
+    setLoading("Transfering");
+    const contract = await tronWeb.contract().at(RastroContractAddress);
+    console.log(contract);
 
-      setLoading("Transfering");
-      const contract = await tronWeb.contract().at(RastroContractAddress);
-      console.log(contract);
+    const trx = await contract.transfer(vendorWallet, amount).send();
 
-      const trx = await contract.transfer(vendorWallet,amount).send();
+    const txId = trx;
 
-      const txId = trx;
+    setTransaction(`https://tronscan.org/#/transaction/${txId}`);
+    console.log(`https://tronscan.org/#/transaction/${txId}`);
 
-      setTransaction(`https://tronscan.org/#/transaction/${txId}`);
-      console.log(`https://tronscan.org/#/transaction/${txId}`);
-
-      setLoading("Transfer");
-    } catch (err) {
-      console.log(err.message);
-    }
+    setLoading("Transfer");
   };
+
   return (
     <div className="">
       <div className="flex mt-28 flex-col items-center justify-center">
         <div className="max-h-auto mx-auto max-w-xl">
           <div className="mb-8 space-y-3">
-            <p className="text-xl font-semibold">Transfer Bearing Tokens</p>
+            <p className="text-xl font-semibold">Transfer (Bearing Tokens)</p>
             <p className="text-gray-500">
               Enter vendor's approved wallet address and the amount of bearing
               tokens to Transfer.
