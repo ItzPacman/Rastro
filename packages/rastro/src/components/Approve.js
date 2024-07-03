@@ -87,7 +87,7 @@ const Approve = ({RastroContractAddress}) => {
                     address
                   </th>
                   <th scope="col" className="px-6 py-3">
-                    <div className="flex items-center">Daily 22limit</div>
+                    <div className="flex items-center">Daily limit</div>
                   </th>
                   <th scope="col" className="px-6 py-3">
                     <div className="flex items-center">Date / Time</div>

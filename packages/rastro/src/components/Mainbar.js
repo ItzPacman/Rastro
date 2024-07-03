@@ -90,7 +90,7 @@ const Mainbar = () => {
         return;
       }
     } catch (e) {
-      // toast.error("Install tronLink wallet");
+     
     }
   }, []);
 
@@ -105,36 +105,30 @@ const Mainbar = () => {
         setAddress(address);
         sessionStorage.setItem("address", address);
       } else {
+
+        await tronLink.request({ method: "tron_requestAccounts" });
+
+        const address = tronWeb.defaultAddress.base58;
+        setAddress(address);
+        sessionStorage.setItem("address", address);
       }
     } catch (error) {
       console.error(error.message);
     }
+     console.log(tronWeb.defaultAddress.base58);
   };
 
-  // const connectWallet = async () => {
-  //   if (window.ethereum) {
-  //     try {
-  //       const provider = new ethers.providers.Web3Provider(window.ethereum);
-  //       const accounts = await provider.send("eth_requestAccounts", []);
-  //       const address = accounts[0];
-  //       setAddress(address);
-  //       console.log("Connected address:", address);
-  //     } catch (error) {
-  //       console.error("Error connecting wallet:", error);
 
-  //     }
-  //   } else {
-  //     console.error("Ethereum object not found, install MetaMask.");
 
-  //   }
-  // };
+  const [isOpen, setIsOpen] = useState(false);
+  
+
 
   return (
     <div className="bg-[#f3f4f7] min-w-screen font-main">
       <header className="w-full mt-5 text-gray-700 shadow-md body-font">
-        <div className=" flex items-center  justify-center p-10 ">
-          <div className="flex items-center w-[10%]">
-            <h6 className="font-bold ml-2 text-lg">Rastro</h6>
+        <div className="flex items-center justify-evenly p-8 md:p-8">
+          <div className="flex items-center space-x-2">
             <img
               alt="logo"
               height={30}
@@ -142,38 +136,35 @@ const Mainbar = () => {
               src={logo}
               className="flex items-center"
             />
+            <h6 className="font-bold text-lg">Rastro</h6>
           </div>
-          <div className=" ml-96 w-[47%] ">
+          <div className="hidden md:flex ml-10 space-x-6  justify-center">
             <button
-              className="mr-5  hover:underline-offset-4 hover:underline  font-medium hover:text-gray-900"
+              className="hover:underline-offset-4 hover:underline font-medium hover:text-gray-900"
               onClick={() => setActiveComponent("Deposit")}
             >
               Deposit
             </button>
-
             <button
-              className=" mr-5 hover:underline-offset-4 hover:underline  font-medium hover:text-gray-900  "
+              className="hover:underline-offset-4 hover:underline font-medium hover:text-gray-900"
               onClick={() => setActiveComponent("Approve")}
             >
               Approve
             </button>
-
             <button
-              className="mr-5 hover:underline-offset-4 hover:underline  font-medium hover:text-gray-900"
+              className="hover:underline-offset-4 hover:underline font-medium hover:text-gray-900"
               onClick={() => setActiveComponent("Distribute")}
             >
               Distribute
             </button>
-
             <button
-              className="font-medium mr-4 hover:underline-offset-4 hover:underline  hover:text-gray-900"
+              className="hover:underline-offset-4 hover:underline font-medium hover:text-gray-900"
               onClick={() => setActiveComponent("Redeem")}
             >
               Redeem
             </button>
-
             <button
-              className="font-medium mr-5 hover:text-gray-900"
+              className="font-medium hover:underline-offset-4 hover:underline hover:text-gray-900"
               onClick={() => setActiveComponent("Transfer")}
             >
               Transfer
@@ -192,11 +183,65 @@ const Mainbar = () => {
               {sessionStorage.getItem("address") === "false" ||
               sessionStorage.getItem("address") === null ||
               sessionStorage.getItem("address") === ""
-                ? "connect "
+                ? "Connect Wallet"
                 : "Connected"}
             </button>
           </div>
+          <div className="md:hidden flex items-center">
+            <button
+              className="outline-none mobile-menu-button"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              <svg
+                className="w-6 h-6 text-gray-500 hover:text-gray-600"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            </button>
+          </div>
         </div>
+        {isOpen && (
+          <div className="md:hidden">
+            <div className="flex flex-col items-center space-y-4 py-5">
+              <button
+                className="hover:underline-offset-4 hover:underline font-medium hover:text-gray-900"
+                onClick={() => setActiveComponent("Deposit")}
+              >
+                Deposit
+              </button>
+              <button
+                className="hover:underline-offset-4 hover:underline font-medium hover:text-gray-900"
+                onClick={() => setActiveComponent("Approve")}
+              >
+                Approve
+              </button>
+              <button
+                className="hover:underline-offset-4 hover:underline font-medium hover:text-gray-900"
+                onClick={() => setActiveComponent("Distribute")}
+              >
+                Distribute
+              </button>
+              <button
+                className="hover:underline-offset-4 hover:underline font-medium hover:text-gray-900"
+                onClick={() => setActiveComponent("Redeem")}
+              >
+                Redeem
+              </button>
+              <button
+                className="hover:underline-offset-4 hover:underline font-medium hover:text-gray-900"
+                onClick={() => setActiveComponent("Transfer")}
+              >
+                Transfer
+              </button>
+            </div>
+          </div>
+        )}
       </header>
       {renderComponent()}
       <Footer />
