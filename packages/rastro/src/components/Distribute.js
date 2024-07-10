@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from "react";
-import DistributePopup from "../PopUps/DistributePopup";
+import DistributePopup from  "../PopUps/DistributePopup"
 import { Link } from "react-router-dom";
+import { ethers } from "ethers";
+import abi from  "../artifacts/RastroAbi.json"
 
-const Distribute = ({RastroContractAddress}) => {
+const Distribute = ({}) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [tokenAmount, settokenAmount] = useState([]);
@@ -13,9 +15,10 @@ const Distribute = ({RastroContractAddress}) => {
   const [loading, setLoading] = useState("Batch Distribute");
   const [transaction, setTransaction] = useState("");
 
-  const tronWeb = useMemo(() => {
-    return window.tronWeb;
-  }, []);
+
+  const RastroFraxAddress ="0x62ABAa96727389E30Fc63503c9cCAf43cB423267"
+  
+
 
   const openPopup = () => {
     setIsPopupOpen(true);
@@ -25,25 +28,30 @@ const Distribute = ({RastroContractAddress}) => {
     setIsPopupOpen(false);
   };
 
-  const batchdistribute = async () => {
+
+
+  const batchdistributeFrax = async () => {
     console.log(addresses, tokenAmount);
 
-    if (!tronWeb) {
-      console.error("TronWeb is not initialized.");
-      return;
-    }
+
 
     try {
       setLoading("Distributing...");
+      
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-      const contract = await tronWeb.contract().at(RastroContractAddress);
-      const trx = await contract.batchDistribute(addresses, tokenAmount).send();
-      const txId = trx;
+      const signer = provider.getSigner();
 
-      setLoading("Batch Distribute");
+      const contract = new ethers.Contract(RastroFraxAddress, abi.abi, signer);
 
-      setTransaction(`https://tronscan.org/#/transaction/${txId}`);
-      console.log(`https://tronscan.org/#/transaction/${txId}`);
+      const distributeTrx = await contract.batchDistribute(addresses, tokenAmount);
+      const txReceipt = await distributeTrx.wait();
+      const approvetxId = txReceipt.transactionHash;
+  
+      setLoading("Batch Approve");
+  
+      setTransaction(`https://fraxscan.com/tx/${approvetxId}`);
+      console.log(`https://fraxscan.com/tx/${approvetxId}`);
     } catch (err) {
       console.error("Batch distribute error:", err.message);
       setLoading("Batch Distribute");
@@ -70,7 +78,7 @@ const Distribute = ({RastroContractAddress}) => {
             settokenAmount={settokenAmount}
             bool={bool}
             setBool={setBool}
-            batchdistribute={batchdistribute}
+            batchdistribute={ batchdistributeFrax}
             setData={setData}
             data={data}
             isOpen={isPopupOpen}
@@ -120,7 +128,7 @@ const Distribute = ({RastroContractAddress}) => {
               Add Receipents
             </button>
             <button
-              onClick={batchdistribute}
+              onClick={batchdistributeFrax}
               className="px-4 py-2 text-sm text-center  font-semibold bg-[#2c749d] text-white rounded-md"
             >
               {loading}

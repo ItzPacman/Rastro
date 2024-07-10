@@ -16,9 +16,9 @@ contract Rastro is Ownable {
     IERC20 private _stablecoin; // The stablecoin (ERC-20 token) stored in the vault
 
     mapping(address => uint256) private _balance; // Mapping of bearing token balances
-    mapping(address => bool) private _approvedMerchants; // Mapping of approved merchants
+    mapping(address => bool) public _approvedMerchants; // Mapping of approved merchants
     mapping(address => uint256) private _maxDailyWithdrawal; // Maximum daily withdrawal for merchants
-    mapping(address => bool) private _distributors; // Mapping of distributors who have received funds
+    mapping(address => bool)  public _distributors; // Mapping of distributors who have received funds
 
     struct WithdrawalInfo {
         uint256 lastWithdrawalTime;
@@ -111,8 +111,8 @@ contract Rastro is Ownable {
      * @param recipient The recipient of the bearing tokens.
      * @param amount The amount of bearing tokens to transfer.
      */
-    function transfer(address recipient, uint256 amount) external {
-        require(_distributors[msg.sender], "Not an authorized distributor");
+    function transferBearingTokens(address recipient, uint256 amount) external {
+        require(_distributors[msg.sender]==true, "Not an authorized distributor");
         require(
             _approvedMerchants[recipient],
             "Recipient is not an approved merchant"

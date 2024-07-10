@@ -2,33 +2,40 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ethers } from "ethers";
+import abi from  "../artifacts/RastroAbi.json"
+
+const Deposit = ({}) => {
 
 
-const Deposit = ({RastroContractAddress}) => {
-
-  const USDDTokenAddress = "TR3FAxxGLFwRh8daUtjiosU8zSsohpBF73"; // ERC20 USDD Token Address
-
+  const RastroFraxAddress ="0x62ABAa96727389E30Fc63503c9cCAf43cB423267"
+  const USDT= "0xcc7aAcd634e9977Fb006f3EBA2a9A5a266fB9d88"
   const [transaction, setTransaction] = useState("");
   const [loading, setLoading] = useState("Deposit");
   const [amount, setAmount] = useState("");
   const [tokenBalance, setTokenBalance] = useState(0);
   const [allowance, setAllowance] = useState(0);
 
+  let  TokenAbi =[
+    "function approve(address _spender, uint256 _value) public returns (bool success)",
+    "function allowance(address _owner, address _spender) public view returns (uint256)",
+    "function balanceOf(address _owner) public view returns (uint256)",
+    "function transfer(address _to, uint256 _value) public returns (bool success)"
 
 
-  const  tronWeb  = useMemo(() => {
-    return window.tronWeb;
-  }, []);
+  ]
+  const decimals = 18;
 
+
+  const ethereum = useMemo(() => window.ethereum, []);
+  const provider = useMemo(() => new ethers.providers.Web3Provider(ethereum), [ethereum]);
+  const signer = useMemo(() => provider.getSigner(), [provider]);
 
   const fetchTokenBalance = async () => {
     try {
-      const contract = await tronWeb.contract().at(USDDTokenAddress);
-      const balanceInSun = await contract
-        .balanceOf(tronWeb.defaultAddress.base58)
-        .call();
-      const decimals = 18; // USDD has 18 decimals
-      const balance = balanceInSun / Math.pow(10, decimals);
+      const contract = new ethers.Contract(USDT, TokenAbi, signer);
+      const balanceInWei = await contract.balanceOf(await signer.getAddress());
+      const balance = ethers.utils.formatUnits(balanceInWei, decimals);
       setTokenBalance(balance);
       console.log("Token balance:", Number(balance));
     } catch (err) {
@@ -37,66 +44,53 @@ const Deposit = ({RastroContractAddress}) => {
   };
 
   const fetchAllowance = async () => {
-    if (!tronWeb) {
-      console.error("TronWeb is not initialized.");
-      return;
-    }
-
     try {
-      const contract = await tronWeb.contract().at(USDDTokenAddress);
-      const allowance = await contract
-        .allowance(tronWeb.defaultAddress.base58, RastroContractAddress)
-        .call();
-      setAllowance(allowance);
-      console.log("Allowance:", Number(allowance));
+      const contract = new ethers.Contract(USDT, TokenAbi, signer);
+      const allowanceInWei = await contract.allowance(await signer.getAddress(), RastroFraxAddress);
+      setAllowance(ethers.utils.formatUnits(allowanceInWei, decimals));
+      console.log("Allowance:", Number(allowanceInWei));
     } catch (err) {
       console.error("Error fetching allowance:", err.message);
     }
   };
 
   useEffect(() => {
-  
-    if (tronWeb) {
+    if (ethereum) {
       fetchTokenBalance();
       fetchAllowance();
     }
-  }, [tronWeb]);
+  }, [ethereum]);
 
-
-
-  const deposit = async () => {
+  const depositFrax = async () => {
     setLoading("Depositing...");
-    const rastroContract = await tronWeb.contract().at(RastroContractAddress);
-    const depositTrx = await rastroContract.deposit(tronWeb.toHex(amount)).send();
-
+    const rastroContract = new ethers.Contract(RastroFraxAddress, abi.abi, signer);
+    const depositTx = await rastroContract.deposit(ethers.utils.parseUnits(amount, decimals));
     setLoading("Awaiting confirmation...");
-    const txId = depositTrx; // The transaction ID
-    setTransaction(`https://tronscan.org/#/transaction/${txId}`);
+    const txReceipt = await depositTx.wait();
+    const txId = txReceipt.transactionHash;
+    setTransaction(`https://fraxscan.com/tx/${txId}`);
     console.log(`Transaction ID: ${txId}`);
     setLoading("Deposit");
   };
 
   const checkApprovalAndDeposit = async () => {
-    if (!tronWeb) {
-      toast.error("Please install Tron wallet");
+    if (!ethereum) {
+      toast.error("Please install MetaMask");
       return;
     }
 
     try {
-      const tokenContract = await tronWeb.contract().at(USDDTokenAddress);
+      const tokenContract = new ethers.Contract(USDT, TokenAbi, signer);
 
       if (Number(tokenBalance) >= Number(amount)) {
         if (Number(allowance) >= Number(amount)) {
-          deposit();
+          await depositFrax();
         } else {
           setLoading("Approving...");
-
-          await tokenContract
-            .approve(RastroContractAddress, tronWeb.toHex(amount))
-            .send();
-
-          setTimeout(() => {
-            deposit();
+          const approveTx = await tokenContract.approve(RastroFraxAddress, ethers.utils.parseUnits(amount, decimals));
+          await approveTx.wait();
+          setTimeout(async () => {
+            await depositFrax();
           }, 2000);
         }
       } else {
@@ -112,9 +106,6 @@ const Deposit = ({RastroContractAddress}) => {
       }, 3000);
     }
   };
-
-
-
 
   return (
     <div className="">
@@ -140,7 +131,7 @@ const Deposit = ({RastroContractAddress}) => {
                 id="tokenType"
                 name="tokenType"
               >
-                <option value={USDDTokenAddress}>USDD</option>
+                <option value={USDT}>USDT</option>
                 {/* Add more options for other token types if needed */}
               </select>
             </div>

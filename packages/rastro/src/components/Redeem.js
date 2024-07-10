@@ -1,42 +1,41 @@
 import React from "react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-const Redeem = ({RastroContractAddress}) => {
+import { ethers } from "ethers";
+import abi from  "../artifacts/RastroAbi.json"
+
+
+
+const Redeem = ({}) => {
  
 
   const [transaction, setTransaction] = useState("");
   const [loading, setLoading] = useState("Redeem");
 
-  const [redeemAmount, setRedeemAmount] = useState([]);
+  const [amount, setAmount] = useState([]);
 
-  const tronWeb = useMemo(() => {
-    return window.tronWeb;
-  }, []);
 
-  const handleRedeem = async (event) => {
-    event.preventDefault();
 
-    try {
-      if (!tronWeb) {
-        throw new Error("TronWeb is not initialized.");
-      }
+  const RastroFraxAddress ="0x62ABAa96727389E30Fc63503c9cCAf43cB423267"
+ 
 
-      setLoading("Redeeming");
-      const contract = await tronWeb.contract().at(RastroContractAddress);
-      console.log(contract);
+  let decimals=18
+  const redeemFrax = async () => {
 
-      const trx = await contract.redeemTokens(redeemAmount).send();
-
-      const txId = trx;
-
-      setTransaction(`https://tronscan.org/#/transaction/${txId}`);
-      console.log(`https://tronscan.org/#/transaction/${txId}`);
-
-      setLoading("Redeem");
-    } catch (err) {
-      console.log(err.message);
-    }
+    setLoading("Depositing...");
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const rastroContract = new ethers.Contract(RastroFraxAddress, abi.abi, signer);
+    const depositTx = await rastroContract.redeemTokens(ethers.utils.parseUnits(amount, decimals));
+    setLoading("Awaiting confirmation...");
+    const txReceipt = await depositTx.wait();
+    const txId = txReceipt.transactionHash;
+    setTransaction(`https://fraxscan.com/tx/${txId}`);
+    console.log(`Transaction ID: ${txId}`);
+    setLoading("Deposit");
   };
+
+
   return (
     <div className="">
       <div className="flex mt-28 flex-col items-center justify-center">
@@ -80,12 +79,12 @@ const Redeem = ({RastroContractAddress}) => {
                   placeholder="Enter amount of tokens"
                   name="tokenAmount"
                   type="text"
-                  onChange={(e) => setRedeemAmount(e.target.value)}
+                  onChange={(e) => setAmount(e.target.value)}
                 />
               </div>
             </div>
             <button
-              onClick={handleRedeem}
+              onClick={redeemFrax}
               className="ring-offset-background focus-visible:ring-ring flex h-10 w-full items-center justify-center whitespace-nowrap rounded-md bg-[#2c749d] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2c749d]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             >
               {loading}

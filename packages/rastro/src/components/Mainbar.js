@@ -8,14 +8,15 @@ import Footer from "./Footer.js";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Transfer from "./Transfer.js";
-// import {ethers} from "ethers";
+
+import {ethers} from "ethers";
 
 const Mainbar = () => {
   const MySwal = withReactContent(Swal);
 
   const showAlert = () => {
     MySwal.fire({
-      title: <p> Open TronLink and connect with Mainnet</p>,
+      title: <p> Open Metmask and connect with frax Mainnet</p>,
       icon: "info",
       showCancelButton: false, // Hide cancel button
       showConfirmButton: true, // Hide confirm button
@@ -29,17 +30,6 @@ const Mainbar = () => {
     });
   };
 
-  try {
-    if (tronWeb) {
-      tronWeb.on("addressChanged", (address) => {
-        window.location.reload();
-        sessionStorage.setItem("address", address.base58);
-        console.log("address", address.base58);
-      });
-    }
-  } catch (e) {
-    // console.log(e.message);
-  }
 
   const [activeComponent, setActiveComponent] = useState("Deposit");
   const RastroContractAddress = "TFsHABHZMM6zY9G3GEGMAcrpCQiGMgoT54";
@@ -64,64 +54,29 @@ const Mainbar = () => {
     }
   };
 
-  const tronWeb = useMemo(() => {
-    return window.tronWeb;
-  }, []);
 
-  const tronLink = useMemo(() => {
-    return window.tronLink;
-  }, []);
 
-  try {
-    if (tronWeb) {
-      tronWeb.on("addressChanged", (address) => {
-        window.location.reload();
-        sessionStorage.setItem("address", address.base58);
-        console.log("address", address.base58);
-      });
-    }
-  } catch (e) {
-    // console.log(e.message);
-  }
-  useEffect(() => {
-    try {
-      if (!tronWeb.defaultAddress.base58) {
-        showAlert();
-        return;
-      }
-    } catch (e) {
-     
-    }
-  }, []);
+  const connectToFrax = async () => {
+    await window.ethereum.request({ method: "eth_requestAccounts" });
 
-  const connectToTronLink = async () => {
-    try {
-      if (!tronWeb.defaultAddress.base58) {
-        showAlert();
+    // Create a new Web3 provider using the browser's Ethereum provider
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-        await tronLink.request({ method: "tron_requestAccounts" });
+    // Get the signer (the account that is connected)
+    const signer = provider.getSigner();
 
-        const address = tronWeb.defaultAddress.base58;
-        setAddress(address);
-        sessionStorage.setItem("address", address);
-      } else {
+    // Get the connected account address
+    const address = await signer.getAddress();
+    setAddress(address);
+    sessionStorage.setItem("address", address);
 
-        await tronLink.request({ method: "tron_requestAccounts" });
-
-        const address = tronWeb.defaultAddress.base58;
-        setAddress(address);
-        sessionStorage.setItem("address", address);
-      }
-    } catch (error) {
-      console.error(error.message);
-    }
-     console.log(tronWeb.defaultAddress.base58);
+    console.log("Connected account address:", address);
   };
 
 
 
   const [isOpen, setIsOpen] = useState(false);
-  
+
 
 
   return (
@@ -172,12 +127,10 @@ const Mainbar = () => {
           </div>
           <div className="flex items-center space-x-4 w-[10%] justify-center">
             <p className="font-medium hover:text-gray-900">
-              {address
-                ? `${address.slice(0, 4)}...${address.slice(-6)}`
-                : ""}
+              {address ? `${address.slice(0, 4)}...${address.slice(-6)}` : ""}
             </p>
             <button
-              onClick={connectToTronLink}
+              onClick={connectToFrax}
               className="px-4 py-2 text-xs font-bold text-white uppercase transition-all duration-150 bg-[#2c749d] rounded shadow outline-none active:bg-teal-600 hover:shadow-md focus:outline-none ease"
             >
               {sessionStorage.getItem("address") === "false" ||

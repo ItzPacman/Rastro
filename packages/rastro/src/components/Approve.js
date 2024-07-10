@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from "react";
-import ApprovePopup from "../PopUps/ApprovePopup";
 import { Link } from "react-router-dom";
+import { ethers } from "ethers";
+import abi from  "../artifacts/RastroAbi.json"
+import ApprovePopup from "../PopUps/ApprovePopup"
 
-const Approve = ({RastroContractAddress}) => {
+const Approve = ({}) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [dailyLimit, setDailyLimit] = useState([]);
@@ -10,12 +12,11 @@ const Approve = ({RastroContractAddress}) => {
   const [data, setData] = useState([]);
 
 
+   const RastroFraxAddress ="0x62ABAa96727389E30Fc63503c9cCAf43cB423267"
+
   const [loading, setLoading] = useState("Batch Approve");
   const [transaction, setTransaction] = useState("");
 
-  const tronWeb = useMemo(() => {
-    return window.tronWeb;
-  }, []); // Include window.tronWeb in the dependency array
 
   const openPopup = () => {
     setIsPopupOpen(true);
@@ -25,29 +26,31 @@ const Approve = ({RastroContractAddress}) => {
     setIsPopupOpen(false);
   };
 
-  const batchApprove = async () => {
+  
+
+
+  const batchApproveFrax = async () => {
     console.log(addresses, dailyLimit, bool);
-
+  
     try {
-      setLoading("Approving..");
-
-      const contract = await tronWeb.contract().at(RastroContractAddress);
-      const approvetrx = await contract
-        .batchApproveMerchants(addresses, bool, dailyLimit)
-        .send();
-      console.log(addresses, dailyLimit, bool);
-      const approvetxId = approvetrx;
-
+      setLoading("Approving...");
+  
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(RastroFraxAddress, abi.abi, signer);
+      const approvetrx = await contract.batchApproveMerchants(addresses, bool, dailyLimit);
+      const txReceipt = await approvetrx.wait();
+      const approvetxId = txReceipt.transactionHash;
+  
       setLoading("Batch Approve");
-
-      setTransaction(
-        `https://tronscan.org/#/transaction/${approvetxId}`
-      );
-      console.log(`https://tronscan.org/#/transaction/${approvetxId}`);
+  
+      setTransaction(`https://fraxscan.com/tx/${approvetxId}`);
+      console.log(`https://fraxscan.com/tx/${approvetxId}`);
     } catch (err) {
       console.error("Batch approval error:", err);
     }
   };
+  
 
   return (
     <div className=" flex  mt-28 flex-col items-center justify-center">
@@ -69,7 +72,7 @@ const Approve = ({RastroContractAddress}) => {
             setDailyLimit={setDailyLimit}
             bool={bool}
             setBool={setBool}
-            batchApprove={batchApprove}
+            batchApprove={batchApproveFrax}
             setData={setData}
             data={data}
             isOpen={isPopupOpen}
@@ -96,8 +99,8 @@ const Approve = ({RastroContractAddress}) => {
               </thead>
               {data.length > 0 ? (
                 data.map((item, index) => (
-                  <tbody  key={index}>
-                    <tr className="bg-white border-b">
+                  <tbody key={index}>
+                    <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                       <th
                         scope="row"
                         className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
@@ -126,7 +129,7 @@ const Approve = ({RastroContractAddress}) => {
               Add vendors
             </button>
             <button
-              onClick={batchApprove}
+              onClick={batchApproveFrax}
           className="px-4 py-2 text-sm text-center  font-semibold bg-[#2c749d] text-white rounded-md"
             >
               {loading}

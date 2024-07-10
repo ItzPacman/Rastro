@@ -1,34 +1,59 @@
 import React from "react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-const Transfer = ({ RastroContractAddress }) => {
+
+import { ethers } from "ethers";
+import abi from "../artifacts/RastroAbi.json";
+
+const Transfer = ({  }) => {
   const [transaction, setTransaction] = useState("");
   const [loading, setLoading] = useState("Transfer");
   const [vendorWallet, setVendorWallet] = useState("");
 
   const [amount, setamount] = useState();
 
-  const tronWeb = useMemo(() => {
-    return window.tronWeb;
-  }, []);
+  const ethereum = useMemo(() => window.ethereum, []);
+  const provider = useMemo(
+    () => new ethers.providers.Web3Provider(ethereum),
+    [ethereum]
+  );
+  const signer = useMemo(() => provider.getSigner(), [provider]);
+
+  const RastroFraxAddress = "0x62ABAa96727389E30Fc63503c9cCAf43cB423267";
+  let decimals=18
 
   const handleTransfer = async (event) => {
     event.preventDefault();
 
     setLoading("Transfering");
-    const contract = await tronWeb.contract().at(RastroContractAddress);
-    console.log(contract);
 
-    const trx = await contract.transfer(vendorWallet, amount).send();
+    try{
+      const rastroContract = new ethers.Contract(
+        RastroFraxAddress,
+        abi.abi,
+        signer
+      );
+      const depositTx = await rastroContract.transferBearingTokens(
+        vendorWallet,
+        ethers.utils.parseUnits(amount, decimals)
+      );
+      setLoading("Awaiting confirmation...");
+      const txReceipt = await depositTx.wait();
+      const txId = txReceipt.transactionHash;
+      setTransaction(`https://fraxscan.com/tx/${txId}`);
+      console.log(`Transaction ID: ${txId}`);
+    }
 
-    const txId = trx;
-
-    setTransaction(`https://tronscan.org/#/transaction/${txId}`);
-    console.log(`https://tronscan.org/#/transaction/${txId}`);
+    catch (err) {
+      console.log(err.message);
+      alert(err.message);
+    }
+   
 
     setLoading("Transfer");
   };
 
+  
   return (
     <div className="">
       <div className="flex mt-28 flex-col items-center justify-center">
